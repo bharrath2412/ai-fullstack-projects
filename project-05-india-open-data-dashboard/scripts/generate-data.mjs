@@ -183,7 +183,10 @@ const cities = CITIES.map((city, cityIndex) => {
 const payload = {
   schemaVersion: 1,
   source: 'synthetic-snapshot',
-  generatedAt: new Date().toISOString(),
+  // Deterministic on purpose: the snapshot's timestamp is the end of its own series,
+  // not the wall clock when it was generated. That makes regeneration byte-identical,
+  // which is what the CI diff check enforces.
+  generatedAt: END_DATE.toISOString(),
   windowDays: DAYS,
   units: { aqi: 'CPCB index', pm25: 'µg/m³', pm10: 'µg/m³', no2: 'µg/m³', temp_c: '°C', humidity: '%' },
   cities,
