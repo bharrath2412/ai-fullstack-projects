@@ -124,6 +124,25 @@ citation UI, and a golden-set evaluation harness that fails CI below Hit@5 0.70 
 └── Makefile
 ```
 
+## Continuous integration
+
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs four parallel jobs on every push and
+pull request: the web app (npm ci, API tests, production build), the agent, the ML service
+(train + tests) and DocMind (index + tests + the retrieval quality gate). No API keys are needed —
+the offline providers are the default.
+
+## Packaging & pushing
+
+```bash
+make test                      # 151 tests across the four projects
+make export                    # git bundle + per-project zips in exports/
+make push REPO=git@github.com:you/your-repo.git
+```
+
+See [PUSH-TO-YOUR-REPO.md](PUSH-TO-YOUR-REPO.md) for five import recipes (new repo, merge into an
+existing repo, copy into a subfolder, git subtree, bundle/zip), the exact conflict-resolution
+policy, and the post-push checklist.
+
 ## Adding these to an existing repository
 
 This workspace is a fresh git repo (2 commits). Three ways to graft it onto your own project:

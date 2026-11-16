@@ -30,7 +30,11 @@ Or let the script do it (it checks whether the remote is empty first):
 
 ```bash
 ./scripts/push-to-repo.sh git@github.com:<you>/<repo>.git
+make push REPO=git@github.com:<you>/<repo>.git      # same thing
 ```
+
+The script refuses to run with a dirty working tree, never force-pushes, and never deletes
+remote branches.
 
 HTTPS works too — use a personal access token as the password:
 `https://<user>:<token>@github.com/<you>/<repo>.git`.
@@ -67,6 +71,24 @@ Then:
 git add -A && git commit -m "Add TaskFlow, AgentForge, churn ML service and DocMind RAG projects"
 git push -u origin add-ai-portfolio
 ```
+
+### Or let the script handle it
+
+`./scripts/push-to-repo.sh <remote-url>` does the same merge from a clone of this repo and
+auto-resolves exactly three predictable conflicts. Because the merge runs here, the remote's
+files win — that keeps your repository's identity intact:
+
+| Conflicted file | Resolution |
+| --- | --- |
+| `README.md` | the remote's README stays; this project's README is written to `PROJECTS.md` |
+| `.gitignore` | union of both files (deduplicated) |
+| `.github/workflows/ci.yml` | the remote's workflow stays; ours becomes `ci-projects.yml` |
+| anything else | the script stops and prints the manual steps |
+
+Verified end-to-end against a throwaway bare remote that already contained a README, a
+`.gitignore`, a `ci.yml` and extra commits: the result kept the remote's README, added
+`PROJECTS.md`, shipped both workflows, merged the ignore rules, kept both histories, and pushed
+cleanly. Mode 1 (empty remote) was verified the same way.
 
 ---
 
