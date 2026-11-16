@@ -1,0 +1,63 @@
+# Runs all four projects side by side.
+#   docker compose up --build
+#   web :8080 · agent :8000 · churn :8100 · rag :8200
+services:
+  taskflow-api:
+    build:
+      context: ./project-01-taskflow-fullstack
+      target: api
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DB_PATH: /data/taskflow.db
+      JWT_SECRET: ${JWT_SECRET:-change-me-before-deploying}
+      CORS_ORIGIN: http://localhost:8080
+      SEED_ON_START: "true"
+    volumes:
+      - taskflow-data:/data
+    ports:
+      - "4000:4000"
+    restart: unless-stopped
+
+  taskflow-web:
+    build:
+      context: ./project-01-taskflow-fullstack
+      target: web
+    depends_on:
+      - taskflow-api
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+  agentforge:
+    build: ./project-02-agentforge-ai-agent
+    environment:
+      LLM_PROVIDER: ${LLM_PROVIDER:-mock}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-gpt-4o-mini}
+      AGENT_MAX_STEPS: "6"
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  churn-service:
+    build: ./project-03-churn-ml-service
+    environment:
+      CHURN_MIN_RECALL: "0.70"
+      CHURN_CV_FOLDS: "3"
+    ports:
+      - "8100:8100"
+    restart: unless-stopped
+
+  docmind:
+    build: ./project-04-docmind-rag
+    environment:
+      DOCMIND_GENERATOR: ${DOCMIND_GENERATOR:-extractive}
+      DOCMIND_EMBEDDING_PROVIDER: ${DOCMIND_EMBEDDING_PROVIDER:-hashing}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    ports:
+      - "8200:8200"
+    restart: unless-stopped
+
+volumes:
+  taskflow-data:

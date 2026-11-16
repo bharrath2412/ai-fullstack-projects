@@ -1,0 +1,44 @@
+# ---- dependencies
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+coverage/
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# ---- environment & secrets
+.env
+.env.local
+*.pem
+
+# ---- runtime data / generated artifacts
+project-01-taskflow-fullstack/server/data/
+project-01-taskflow-fullstack/client/dist/
+project-02-agentforge-ai-agent/app/data/demo.db
+project-03-churn-ml-service/data/churn.csv
+project-03-churn-ml-service/artifacts/models/
+project-03-churn-ml-service/artifacts/reference.csv
+project-04-docmind-rag/data/index/
+
+# ---- editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+
+# ---- tool caches
+.cache/
+
+# ---- npm cache
+.npm/
+
+# ---- generated export bundles (build with `make export`)
+exports/
