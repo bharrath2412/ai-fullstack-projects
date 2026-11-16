@@ -139,7 +139,9 @@ make export                    # git bundle + per-project zips in exports/
 make push REPO=git@github.com:you/your-repo.git
 ```
 
-See [PUSH-TO-YOUR-REPO.md](PUSH-TO-YOUR-REPO.md) for five import recipes (new repo, merge into an
+Fastest path to `bharrath2412/ai-fullstack-projects`: see
+[QUICKSTART-PUSH.md](QUICKSTART-PUSH.md) (two steps, no token shared).
+Broader options in [PUSH-TO-YOUR-REPO.md](PUSH-TO-YOUR-REPO.md) — five import recipes (new repo, merge into an
 existing repo, copy into a subfolder, git subtree, bundle/zip), the exact conflict-resolution
 policy, and the post-push checklist.
 
