@@ -1,5 +1,7 @@
 # Full-stack & AI engineering monorepo
 
+[![CI](https://github.com/bharrath2412/ai-fullstack-projects/actions/workflows/ci.yml/badge.svg)](https://github.com/bharrath2412/ai-fullstack-projects/actions/workflows/ci.yml)
+
 Four self-contained, production-shaped projects — a full-stack web app, an AI agent service, a
 machine-learning service and a RAG application. Every project has real source code, tests that
 pass, offline defaults (no API keys required), Dockerfiles and its own README.
