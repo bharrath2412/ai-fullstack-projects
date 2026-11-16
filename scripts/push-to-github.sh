@@ -43,7 +43,7 @@ fi
 
 if [[ -z "${REPO_NAME}" || "$REMOTE_URL" != *github.com* ]]; then
   # local/other remote: skip the GitHub-specific pre-flight
-  exec ./scripts/push-to-repo.sh "$REMOTE_URL"
+  exec bash ./scripts/push-to-repo.sh "$REMOTE_URL"
 fi
 
 NEW_REPO_URL="https://github.com/new?name=${REPO_NAME}&description=Four%20production-shaped%20projects%3A%20React%2BExpress%20web%20app%2C%20AI%20agent%2C%20ML%20service%2C%20RAG%20app&visibility=public"
@@ -80,4 +80,4 @@ EOF
   exit 1
 fi
 
-exec ./scripts/push-to-repo.sh "$REMOTE_URL"
+exec bash ./scripts/push-to-repo.sh "$REMOTE_URL"
