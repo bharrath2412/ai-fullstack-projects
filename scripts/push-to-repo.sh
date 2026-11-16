@@ -48,14 +48,11 @@ else
   git remote add origin "$REMOTE_URL"
 fi
 
-git fetch --quiet origin || true
+# Ask the remote directly. Local remote-tracking refs can be stale (e.g. this repo was
+# cloned from somewhere else), which would otherwise make an empty remote look populated.
+REMOTE_SHA="$(GIT_TERMINAL_PROMPT=0 git ls-remote --heads "$REMOTE_URL" "$BRANCH" 2>/dev/null | awk '{print $1}' | head -1 || true)"
 
-REMOTE_HAS_COMMITS=0
-if git rev-parse --verify --quiet "origin/$BRANCH" >/dev/null; then
-  REMOTE_HAS_COMMITS=$(git rev-list --count "origin/$BRANCH")
-fi
-
-if [[ "$REMOTE_HAS_COMMITS" == "0" ]]; then
+if [[ -z "$REMOTE_SHA" ]]; then
   echo "==> remote is empty: pushing this history as '$BRANCH'"
   git branch -M "$BRANCH" 2>/dev/null || true
   git push -u origin "$BRANCH"
@@ -64,9 +61,12 @@ if [[ "$REMOTE_HAS_COMMITS" == "0" ]]; then
   exit 0
 fi
 
-echo "==> remote already has $REMOTE_HAS_COMMITS commit(s) on '$BRANCH'"
-git fetch origin "$BRANCH"
+echo "==> remote branch '$BRANCH' already exists ($REMOTE_SHA)"
+# Drop stale tracking refs from any previous origin before fetching the real one.
+git fetch --quiet --prune origin || true
+git fetch --quiet origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
 git branch -M "$BRANCH" 2>/dev/null || true
+echo "    remote has $(git rev-list --count "origin/$BRANCH") commit(s)"
 
 if git merge-base --is-ancestor "origin/$BRANCH" HEAD; then
   echo "    local history already contains the remote history — fast-forward push"
