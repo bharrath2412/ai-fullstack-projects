@@ -2,9 +2,11 @@
 
 [![CI](https://github.com/bharrath2412/ai-fullstack-projects/actions/workflows/ci.yml/badge.svg)](https://github.com/bharrath2412/ai-fullstack-projects/actions/workflows/ci.yml)
 
-Four self-contained, production-shaped projects — a full-stack web app, an AI agent service, a
-machine-learning service and a RAG application. Every project has real source code, tests that
-pass, offline defaults (no API keys required), Dockerfiles and its own README.
+Six self-contained, production-shaped projects: a full-stack web app, an AI agent service, a
+machine-learning service, a RAG application, an offline-first PWA dashboard and a multi-tenant GST
+invoicing SaaS. Every project has real source code, tests that pass, offline defaults (no API keys
+required), a Dockerfile and its own README. Plan for the next three is in
+[docs/BLUEPRINT.md](docs/BLUEPRINT.md).
 
 | # | Project | Stack | What it proves | Tests |
 | --- | --- | --- | --- | --- |
@@ -12,8 +14,10 @@ pass, offline defaults (no API keys required), Dockerfiles and its own README.
 | 2 | [**AgentForge**](project-02-agentforge-ai-agent) — tool-using AI agent | FastAPI · ReAct loop · SSE · sandboxed tools | Agent runtime design: budgets, tracing, guardrails, provider abstraction, offline determinism | **57 passing** |
 | 3 | [**Churn ML service**](project-03-churn-ml-service) — train → serve → monitor | scikit-learn · pandas · FastAPI · PSI drift | Leakage-safe pipelines, threshold tuning on a business constraint, registry, explanations, drift | **40 passing** |
 | 4 | [**DocMind**](project-04-docmind-rag) — RAG over your docs | FastAPI · BM25 + dense + MMR · SSE | Retrieval quality, citations, honest refusals, evaluation gates | **44 passing** |
+| 5 | [**AirGrid**](project-05-india-open-data-dashboard) — India air-quality PWA | React 18 · Vite · hand-written service worker · SVG charts | Frontend craft: 59 kB gzip budget in CI, CPCB AQI maths, offline-first, a11y | **48 passing** |
+| 6 | [**BillBook**](project-06-billbook-gst-saas) — GST invoicing SaaS | FastAPI · SQLite · JWT RBAC · fpdf2 · Razorpay test mode | Full-stack depth: multi-tenancy, integer-paise GST engine, gapless numbering, PDF, payments | **143 passing** |
 
-**Totals: 151 tests, 0 network dependencies for the offline path.**
+**Totals: 342 tests, 0 network dependencies for the offline path.**
 
 Measured results on the bundled data:
 
@@ -24,6 +28,10 @@ Measured results on the bundled data:
 | RAG Hit@5 / MRR | **100% / 0.933** |
 | RAG keyword coverage of answers | **78.3%** (precision-first quoting) |
 | Agent tools covered by safety tests | 4 / 4 (calculator, SQL, docs, HTTP) |
+| AirGrid shipped JavaScript (gzip, incl. React) | **58.5 kB** (budget gate: JS ≤ 200 kB, total ≤ 320 kB) |
+| AirGrid snapshot | 5 cities × 45 days × 25 stations, byte-identical on regeneration |
+| BillBook coverage of `app/` | **92%** (143 tests, 7 files) |
+| BillBook concurrent invoice numbering | 10 threads × 2 invoices → 20/20 unique, gapless |
 
 ## Quick start
 
@@ -48,6 +56,14 @@ uvicorn churn.service:app --port 8100
 cd project-04-docmind-rag
 pip install -r requirements-dev.txt && python -m docmind.ingest
 uvicorn docmind.service:app --port 8200
+
+# 5 — air-quality PWA  (:5300)
+cd project-05-india-open-data-dashboard && npm install && npm run dev
+
+# 6 — GST invoicing SaaS  (:8100, admin UI at /)
+cd project-06-billbook-gst-saas
+pip install -r requirements-dev.txt && python -m scripts.seed
+uvicorn app.main:app --reload --port 8100    # demo@billbook.dev / demo12345
 ```
 
 Run everything at once:
@@ -91,13 +107,36 @@ embeddings, a numpy vector store, hybrid BM25 + dense retrieval with MMR, an ext
 generator that quotes sources and refuses when it cannot ground an answer, SSE streaming, a
 citation UI, and a golden-set evaluation harness that fails CI below Hit@5 0.70 / MRR 0.50.
 
+### 5 · AirGrid — frontend craft, measured
+A React 18 PWA over CPCB-shaped air-quality data for Chennai, Delhi, Bengaluru, Mumbai and
+Hyderabad. AQI is **computed** from the published Indian breakpoints (not the US EPA tables, and
+the difference is unit-tested at every band edge), charts are hand-rolled SVG, the service worker
+is ~1 kB and hand-written (no Workbox), and `scripts/check-budget.mjs` fails the build if the
+shipped JavaScript or CSS grows past budget. Data comes from a deterministic seeded snapshot, with
+an opt-in data.gov.in live mode that degrades to the snapshot with a visible banner instead of
+breaking. Lighthouse is not quoted because it cannot be run in this workspace — the README says
+exactly that and gives the command to reproduce it.
+
+### 6 · BillBook — full-stack depth
+Multi-tenant GST invoicing and inventory: FastAPI + SQLite (WAL) + a hand-written admin client with
+no build step. Tenant id comes from the verified JWT only, and cross-tenant reads return 404 so
+existence is never leaked. The tax engine is pure and works in integer paise (CGST+SGST split
+derived from the whole tax so the halves always add up), invoice numbers are gapless per financial
+year under concurrency (`BEGIN IMMEDIATE` + a unique constraint), stock is a ledger that reverses on
+cancel, PDFs are real tax invoices with amount in words in Indian numbering, and payments are
+Razorpay **test mode only** — signature forgery and payment-id replay both have tests that expect
+rejection.
+
 ## Repository conventions
 
 - **No secrets in code.** Every service reads env vars, has a `.env.example`, and refuses to boot
   in production with a placeholder secret.
 - **Offline-first.** Tests never need network access or API keys; hosted providers are opt-in.
 - **Errors are data.** Stable error codes, field-level validation details, request/trace ids.
-- **Every number is reproducible.** Fixed seeds, fingerprints of the dataset, versioned artifacts.
+- **Every number is reproducible.** Fixed seeds, fingerprints of the dataset, versioned artifacts,
+  and performance/coverage numbers quoted in a README can be re-measured with one command.
+- **No invented metrics.** Nothing claims a Lighthouse score, a latency figure or a deployment that
+  was not actually produced; where a number cannot be measured in CI, the command is documented.
 - **Docs live with the code.** Each README doubles as the design rationale and the limitations list.
 
 ## Layout
@@ -122,21 +161,33 @@ citation UI, and a golden-set evaluation harness that fails CI below Hit@5 0.70 
 │   ├── corpus/                      # 4 realistic markdown docs
 │   ├── static/index.html            # chat UI with citations
 │   └── tests/
+├── project-05-india-open-data-dashboard/  # React + Vite PWA
+│   ├── src/lib/                     # CPCB AQI maths, analytics
+│   ├── src/data/                    # adapter + deterministic snapshot
+│   ├── public/                      # manifest, hand-written service worker, icons
+│   └── scripts/                     # data generator, gzip budget gate
+├── project-06-billbook-gst-saas/    # FastAPI + SQLite SaaS
+│   ├── app/                         # gst.py, security.py, services.py, pdf.py, payments.py, routers/
+│   ├── static/                      # hand-written admin UI (no build step)
+│   ├── scripts/seed.py              # deterministic demo shop
+│   └── tests/                       # 143 tests incl. concurrency and signature forgery
+├── docs/BLUEPRINT.md                # Phase-2 spec for the whole set (incl. projects 7–9)
 ├── docker-compose.yml
 └── Makefile
 ```
 
 ## Continuous integration
 
-[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs four parallel jobs on every push and
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs six parallel jobs on every push and
 pull request: the web app (npm ci, API tests, production build), the agent, the ML service
-(train + tests) and DocMind (index + tests + the retrieval quality gate). No API keys are needed —
-the offline providers are the default.
+(train + tests), DocMind (index + tests + the retrieval quality gate), AirGrid (tests, production
+build, **gzip budget gate**) and BillBook (seed, 143 tests, coverage). No API keys are needed — the
+offline providers are the default.
 
 ## Packaging & pushing
 
 ```bash
-make test                      # 151 tests across the four projects
+make test                      # 342 tests across the six projects
 make export                    # git bundle + per-project zips in exports/
 make push REPO=git@github.com:you/your-repo.git
 ```
@@ -149,7 +200,7 @@ policy, and the post-push checklist.
 
 ## Adding these to an existing repository
 
-This workspace is a fresh git repo (2 commits). Three ways to graft it onto your own project:
+Three ways to graft a project onto your own repo:
 
 ```bash
 # A. copy the folders you want, keep your history
@@ -172,7 +223,9 @@ is standalone (setup, API, tests, config, limitations). Merge `.gitignore` rules
 
 ## Roadmap ideas
 
-- Unify the three Python services behind one gateway + shared compose network
+- Build the three specified-but-unbuilt products in `docs/BLUEPRINT.md` (DefectEye, TriageOps,
+  CampusHire AI)
+- Unify the Python services behind one gateway + shared compose network
 - Add Playwright e2e for TaskFlow's drag & drop and a Lighthouse budget
 - Persist agent traces to Postgres and emit OpenTelemetry spans
 - Real temporal validation and a fairness audit for the churn model

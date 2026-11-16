@@ -1,6 +1,6 @@
-# Runs all four projects side by side.
+# Runs all six projects side by side.
 #   docker compose up --build
-#   web :8080 · agent :8000 · churn :8100 · rag :8200
+#   web :8080 · agent :8000 · churn :8100 · rag :8200 · airgrid :5300 · billbook :8101
 services:
   taskflow-api:
     build:
@@ -59,5 +59,25 @@ services:
       - "8200:8200"
     restart: unless-stopped
 
+  airgrid:
+    build: ./project-05-india-open-data-dashboard
+    ports:
+      - "5300:8080"
+    restart: unless-stopped
+
+  billbook:
+    build: ./project-06-billbook-gst-saas
+    environment:
+      # Demo credentials are created by scripts/seed.py; set JWT_SECRET for anything real.
+      JWT_SECRET: ${JWT_SECRET:-change-me-before-deploying}
+      PAYMENT_MODE: ${PAYMENT_MODE:-simulated}
+      ENV: ${ENV:-dev}
+    volumes:
+      - billbook-data:/data
+    ports:
+      - "8101:8100"
+    restart: unless-stopped
+
 volumes:
   taskflow-data:
+  billbook-data:

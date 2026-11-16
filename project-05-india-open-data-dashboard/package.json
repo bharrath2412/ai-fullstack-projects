@@ -1,0 +1,28 @@
+{
+  "name": "airgrid-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "AirGrid — installable, offline-capable India air-quality dashboard",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "data": "node scripts/generate-data.mjs",
+    "check:budget": "node scripts/check-budget.mjs"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
+    "@vitejs/plugin-react": "^4.3.1",
+    "jsdom": "^29.1.1",
+    "vite": "^5.4.2",
+    "vitest": "^2.1.1"
+  }
+}

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BillBook — GST invoicing &amp; inventory</title>
+    <meta name="description" content="Multi-tenant GST invoicing, inventory and payment tracking for small Indian shops." />
+    <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232563eb'/><text x='16' y='22' font-size='16' font-family='sans-serif' font-weight='bold' text-anchor='middle' fill='white'>B</text></svg>" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <header class="topbar" id="topbar" hidden>
+      <div class="brand">
+        <span class="mark" aria-hidden="true">BB</span>
+        <div>
+          <strong id="tenant-name">BillBook</strong>
+          <small id="tenant-meta" class="muted"></small>
+        </div>
+      </div>
+      <nav class="tabs" aria-label="Sections">
+        <a href="#/dashboard" data-nav="dashboard">Dashboard</a>
+        <a href="#/items" data-nav="items">Items</a>
+        <a href="#/invoices" data-nav="invoices">Invoices</a>
+        <a href="#/reports" data-nav="reports">Reports</a>
+        <a href="#/settings" data-nav="settings">Settings</a>
+      </nav>
+      <div class="who">
+        <span class="pill" id="role-pill"></span>
+        <span class="pill pay" id="payment-pill"></span>
+        <button class="btn ghost" id="logout">Sign out</button>
+      </div>
+    </header>
+
+    <main id="main">
+      <div id="view" aria-live="polite"></div>
+    </main>
+
+    <div id="toast" class="toast" role="status" hidden></div>
+
+    <footer class="foot">
+      <span>BillBook v<span id="version">1.0.0</span> · Razorpay test mode only · no real money moves</span>
+      <a href="/docs" target="_blank" rel="noreferrer">API docs</a>
+    </footer>
+
+    <script src="/static/app.js" type="module"></script>
+  </body>
+</html>

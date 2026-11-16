@@ -26,6 +26,14 @@ project-03-churn-ml-service/data/churn.csv
 project-03-churn-ml-service/artifacts/models/
 project-03-churn-ml-service/artifacts/reference.csv
 project-04-docmind-rag/data/index/
+project-06-billbook-gst-saas/billbook.db
+project-06-billbook-gst-saas/billbook.db-shm
+project-06-billbook-gst-saas/billbook.db-wal
+project-05-india-open-data-dashboard/dist/
+
+# ---- coverage
+.coverage
+.coverage.*
 
 # ---- editors / OS
 .vscode/
