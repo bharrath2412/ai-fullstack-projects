@@ -9,10 +9,11 @@
 #   * remote already has commits  -> merges the two histories (nothing is deleted)
 #
 # Merge conflicts are auto-resolved for the three predictable files, using the
-# policy documented in PUSH-TO-YOUR-REPO.md:
-#   README.md                     -> yours is kept, this one is saved as PROJECTS.md
+# policy documented in PUSH-TO-YOUR-REPO.md. "yours" here always means the files
+# already in the remote repository, because that repo keeps its identity:
+#   README.md                     -> the remote's is kept, this project README -> PROJECTS.md
 #   .gitignore                    -> union of both files
-#   .github/workflows/ci.yml      -> yours is kept, this one becomes ci-projects.yml
+#   .github/workflows/ci.yml      -> the remote's is kept, this one -> ci-projects.yml
 # Any other conflict stops the run so you can resolve it deliberately.
 #
 # Never force-pushes. Never deletes remote branches.
@@ -81,14 +82,16 @@ if ! git merge --no-edit --allow-unrelated-histories "origin/$BRANCH"; then
   for path in "${CONFLICTS[@]}"; do
     case "$path" in
       README.md)
-        # Keep the repository's existing README; preserve ours alongside it.
-        if [[ ! -f PROJECTS.md ]] && git show ":3:README.md" > PROJECTS.md 2>/dev/null; then
-          echo "      README.md        -> kept yours, ours saved as PROJECTS.md"
+        # Stage 2 = this repo ("ours"), stage 3 = the remote being merged in ("theirs").
+        # The remote repository keeps its own README; this project's README is preserved
+        # beside it as PROJECTS.md.
+        if [[ ! -f PROJECTS.md ]] && git show ":2:README.md" > PROJECTS.md 2>/dev/null; then
+          echo "      README.md        -> kept the remote's, this README saved as PROJECTS.md"
           git add PROJECTS.md
         else
-          echo "      README.md        -> kept yours"
+          echo "      README.md        -> kept the remote's"
         fi
-        git checkout --ours -- README.md && git add README.md
+        git checkout --theirs -- README.md && git add README.md
         ;;
       .gitignore)
         {
@@ -102,11 +105,11 @@ if ! git merge --no-edit --allow-unrelated-histories "origin/$BRANCH"; then
         echo "      .gitignore       -> merged (union of both)"
         ;;
       .github/workflows/ci.yml)
-        if [[ ! -f .github/workflows/ci-projects.yml ]] && git show ":3:.github/workflows/ci.yml" > .github/workflows/ci-projects.yml 2>/dev/null; then
+        if [[ ! -f .github/workflows/ci-projects.yml ]] && git show ":2:.github/workflows/ci.yml" > .github/workflows/ci-projects.yml 2>/dev/null; then
           git add .github/workflows/ci-projects.yml
-          echo "      ci.yml           -> kept yours, ours renamed to ci-projects.yml"
+          echo "      ci.yml           -> kept the remote's, this one renamed to ci-projects.yml"
         fi
-        git checkout --ours -- .github/workflows/ci.yml && git add .github/workflows/ci.yml
+        git checkout --theirs -- .github/workflows/ci.yml && git add .github/workflows/ci.yml
         ;;
       *)
         echo "      $path -> needs your decision"
